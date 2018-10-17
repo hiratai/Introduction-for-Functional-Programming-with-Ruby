@@ -32,164 +32,221 @@
 			<div class="slides">
 				<section data-markdown data-separator="^\n---$" data-separator-vertical="^\n--$">
 					<script type="text/template">
-						### 関数型プログラミング入門
-						#### Introduction for Functional Programming
-						<div style="margin-top: 1.0em; font-size: 0.8em;">2017/12/13 Taiki Hiramatsu</div>
+						<div style="margin-top: 5.0em;"></div>
+
+						### Rubyで学ぶ関数型プログラミング 
+						##### Introduction for Functional Programming with Ruby
+						<div style="margin-top: 5.0em; font-size: 0.8em; text-align: right;">2018/10/17 Taiki Hiramatsu</div>
+
+						---
+						### 本日扱うもの
+						* Rubyにおける関数(メソッド)の扱い
+						* Rubyの便利な高階関数の紹介
+						
+						--
+						### 本日扱わないもの
+						* 参照透過性、イミュータブルなど言語仕様への依存が強い概念
+						* ファンクタ、モナドなど数学寄りの概念
+						
+						--
+						### 前回の資料
+						<br />
+						2017年末に発表した資料です。  
+						<br />
+						[関数型プログラミング入門](https://hiratai.github.io/Introduction-for-Functional-Programming/)
 
 						---
 						### 関数型プログラミングとは？
-						* オブジェクト指向などと並ぶプログラミング手法の１つ
-						* おおざっぱに言うと、処理を副作用のない関数に分離するプログラミング手法
-						* 関数型プログラミングを行いやすいように作られた言語を関数型言語と呼ぶことが多い
+						<br />
+						プログラミング手法の１つ
+						* 手続き型
+						* オブジェクト指向型
+						* __関数型__
 
 						--
-						### プログラミング手法としての関数型
-						* 手続き型：手続き(プロシージャ)や関数を利用
-						* オブジェクト指向型：オブジェクトを利用
-						* 関数型：(数学的な)関数を利用
+						### オブジェクト指向と関数型の違い
+						* オブジェクト指向では、オブジェクトへ状態を持たせるが、外部から直接状態の読み書きはできず、
+						オブジェクト間でメッセージのやりとりをすることで、状態を管理する。
+						→__カプセル化__
+						* 関数型では、処理を副作用のない関数に分離することで、根本的に管理の必要な「状態」を減らす。
 
 						--
-						### 処理を副作用のない関数に分離するプログラミング手法
+						### 副作用とは
 						* 副作用 ＝ 関数の実行による暗黙的な状態の変化
 						```Ruby
 						# 副作用のある関数 (Ruby)
-						a = 0
-						def count(x)
-							a = a + x
+						def add(a, b)
+							puts "Success to add"
+							a + b
 						end
 						```
-						* 参照透過性 ＝ 暗黙的な入力による出力の変化がないこと ＝ 同じ入力なら同じ出力が必ず返ること
-						* 純粋関数 ＝ 参照透過性を持ち、副作用のない関数
+						```Ruby
+						# 副作用のない純粋な関数 (Ruby)
+						def add(a, b)
+							{ value: a + b, message: "Success to add" }
+						end
+						```
+						<ul style="font-size: 0.5em; text-align: right; list-style-type: none;">
+							<li>純粋関数：参照透過性を持ち、副作用のない関数</li>
+							<li>参照透過性：暗黙的な入力による出力の変化がないこと</li>
+						</ul>
 
 						--
-						### 関数型プログラミングと関数型言語
-						* 有名な関数型言語  
-						LISP, Erlang, Haskell, ML, Scala, Rust, Elixir
-						* 関数型プログラミングで使われる機能/特性  
-						Lambda, 高階関数, イミュータブル, モナド, カリー化 etc.
-						* 関数型の言語でしか、関数型プログラミングが行えないというわけではなく、
-						多くの言語でその考え方を適用することができる
+						### 副作用があると何がまずいのか
+						* 入出力がはっきりしている関数は汎用的に利用できるが、暗黙的な入出力がある関数は特定の場面でしか使えないことが多い。  
+						<br />
+						<div style="font-size: 0.8em;">
+						→ 似たような機能がほしい → コピペ  
+						→ コピペされたものも副作用だらけ  
+						→ 似たような機能がほしい → コピペの反乱  
+						→ 以下負のループ  
+						</div>
+						<br />
+						__単一責任の原則(SRP)を満たせなくなります。__
 
 						---
-						### 関数型プログラミングのメリット
-						* 副作用を減らし、コードの見通し・保守性を向上させる
-						* 状態管理がシンプルになるので並列処理との相性も良い
-						* コードが短くなることが多い
-						* テストがしやすい
+						### Rubyにおける関数
+						<br /><br />
+						Rubyで関数/メソッドをオブジェクト化(変数に代入)する方法は？
+						<br /><br />
 
 						--
-						### 関数型プログラミングの特徴
-						* 不要な変数宣言・代入は避ける
-						* メソッドチェーンを多用
-						* 高階関数を多く利用
+						### Rubyにおけるラムダ式
+						<br /><br />
+						Rubyにおける最小の関数オブジェクト
+						```Ruby
+						# 引数なしのラムダ式
+						->{}
+						```
+						```Ruby
+						# 引数ありのラムダ式
+						->(){}
+						```
+						<br /><br />
+
+						--
+						### Rubyにおけるラムダ式
+						<br /><br />
+						簡単なラムダ式の例
+						```Ruby
+						# 常に1を返すラムダ式を変数fへ代入
+						f = ->{ 1 }
+						# 呼び出し
+						f.call
+						=> 1
+						```
+						<br /><br />
+
+						--
+						### Enumerable#mapの例1
+						<br />
+						１から5の範囲の数値を文字列に変換する例
+						```
+						# 下記は同等の意味
+						(1..5).map { |n| n.to_s }
+						(1..5).map(&:to_s)
+						=> ["1", "2", "3", "4", "5"]
+						```
+						<br />
+
+						--
+						### Enumerable#mapの例2
+						<br />
+						常に1を返すラムダ式をmapでRangeへ適用
+						```Ruby
+						# これだと固定の出力になってしまう
+						f = ->{ 1 }
+						(1..5).map(&f)
+						=> [1, 1, 1, 1, 1]
+						```
+						下記の例では各要素を２倍した新しい配列を返す
+						```Ruby
+						# 引数を取れば配列の変換に使える
+						f = ->(n){ n * 2 }
+						(1..5).map(&f)
+						=> [2, 4, 6, 8, 10]
+						```
+						
+						--
+						### Enumerable#mapの例3
+						<br />
+						オープンクラスでも同じことが実現可能
+						```Ruby
+						class Fixnum
+						  def twice
+						    self * 2
+						  end
+						end
+
+						(1..5).map(&:twice)
+						=> [2, 4, 6, 8, 10]
+						```
+
+						--
+						### 部分適用 / カリー化
+						<br />
+						```Ruby
+						# ２つ引数があるパターンで部分適用について考える。
+						# 例. ある配列を5を法とした剰余類の配列に変換
+						f = ->(n, a){ a % n }
+						(1..10).map(&f.curry.call(5))
+						=> [1, 2, 3, 4, 0, 1, 2, 3, 4, 0]
+						```
+						
+						--
+						### 関数合成
+						<br /><br />
+						Rubyの場合、レシーバもしくは第一引数のみ必要な処理ならで関数化してチェーンできる。
+						<br /><br />
 
 						---
-						### 関数型プログラミングの実例
-						* 単純なイテレーションの例 (Ruby)
+						### Rubyにおける高階関数型メソッド
+						<br />
+						【汎用系】  
+						each / map / reduce / tap / each_with_object / transform_keys(Ruby 2.5/ Rails 4.0) / transform_values(2.4/4.2)  
+						<br />
+						【特化系】  
+						group_by / select / reject etc.
+						<br />
+						
+						--
+						### transform_values (Ruby 2.4/Rails 4.2)
 						```Ruby
-						# 手続き型の例
-						array = 1..100
-						total = 0
-						array.each do |number|
-							total = total + number
-						end
-						puts total
-						```
-						```Ruby
-						# 関数型の例
-						array = 1..100
-						puts array.reduce(:+)
+						# Enumerable#transform_valuesの例
+						{ a: 1, b: 2, c: 3 }.transform_values { |v| v * 2 }
+						=> { a: 2, b: 4, c: 6 }
+
+						{ a: 1, b: 2, c: 3 }.transform_values(&:to_s)
+						=> { a: "1", b: "2", c: "3" }
 						```
 
 						--
-						* ActiveRecordの例 (Ruby on Rails)  
-						例. 料金が3000円以上の注文の合計金額を求める
+						### group_by
 						```Ruby
-						# 手続き型の例
-						@orders = Order.all
-						total_price = 0
-						@orders.each do |order|
-							total_price = total_price + order.price if order.price >= 3000
-						end
-						puts total_price
-						```
-						```Ruby
-						# 関数型の例
-						@orders = Order.all
-						puts @orders.select { |order| order.price >= 3000 }.reduce(:+)
-						```
-						```Ruby
-						# このケースではDB側で集計する方がパフォーマンスが良い
-						puts Order.where(Order.arel_table[:price].gteq(3000)).sum(:price)
-						```
-
-						--
-						* ActiveRecordの例 応用系 (Ruby on Rails)  
-						例. 日毎の売上金額を集計して、日付を分かりやすい形で出力する
-						```Ruby
-						# 日毎の売上金額を集計して、Hash(datetime => integer)形式で取得
-						@orders = Order
-								.group("DATE_TRUNC('day', sold_at)")
-								.sum(:price)
-						# Keyをリネームした新しいHashを生成
-						@result = @orders.inject({}) do |accumulator, (datetime, price)|
-							accumulator[datetime.strftime("%Y-%m-%d")] = price
-							accumulator
-						end
-						# 結果を出力
-						puts @result
-						# => { "2017-12-13" => 100000, "2017-12-14" => 200000 }
-						```
-
-						--
-						### Rubyで使える関数型ライクなメソッドの例
-						- `map/collect`　　　　　　　　　　　　　　
-						- `inject/reduce`
-						- `select`
-						- `reject`
-						- `tap`
-
-						--
-						### Javascriptで使える関数型ライクなメソッドの例 (ES5.1)
-						- `map`　　　　　　　　　　　　　　　　　　
-						- `reduce`
-						- `filter`
-
-						--
-						* Javascriptの例 (ES6)  
-						例. 0から100までの整数値の総和を求める
-						```js
-						# 手続き型の例
-						let array = [...Array(101).keys()];
-						let total = 0;
-						for(let n = 0; n < array.length; n++){
-							total += array[n];
-						}
-						console.log(total);
-						```
-						```js
-						# 関数型の例
-						let array = [...Array(101).keys()];
-						console.log(array.reduce((a, x) => a + x, 0));
+						# Enumerable#group_byの例
+						# GiftExchange(id: integer, user_id: integer, gift_id: integer, created_at: datetime, updated_at: datetime)
+				    GiftExchange.group(:user_id).count.group_by { |_, v| v }.transform_values(&:count)
+						=> {1=>159, 2=>44, 3=>6, 4=>4, 5=>1, 13=>1}
 						```
 
 						---
 						### まとめ
-						* 関数型プログラミングは、潜在的なバグを減らし保守性を向上させる
-						* 特定の言語に依存した考え方ではなく、あくまでプログラミング全般の設計思想的なもの
-						* 明日からすべて関数型言語で。ではなくて今使っている言語の関数型ライクな機能を使えると良いのでは
+						* 関数型プログラミングの副作用を減らすというアプローチは、コードの潜在的なバグを減らし保守性を向上させる。
+						* Rubyにも関数型のエッセンスを取り入れたメソッドが多く用意されている。これらを利用することで関数型プログラミングのメリットを多少なりとも享受できる。
 
 						---
-						### 参考(になる)サイト
+						### 参考サイト・図書
 						- [関数型言語 - Wikipedia](https://ja.wikipedia.org/wiki/%E9%96%A2%E6%95%B0%E5%9E%8B%E8%A8%80%E8%AA%9E)
 						- [関数型プログラミング入門 - POSTD](http://postd.cc/an-introduction-to-functional-programming/)
-						- [参照透過性と副作用についての提言 - Qiita](https://qiita.com/sasanquaneuf/items/3df1001a027e868e9e0e)
+						- [関数型つまみ食い: 関数型プログラミングの何が嬉しいのか？](https://ubiteku.oinker.me/2017/05/08/purpose-of-functional-programming/)
+						- [関数プログラミング実践入門](https://www.amazon.co.jp/dp/4774183903)
 
 						--
-						### おまけ
-						* このスライドはReveal.jsで作ったものをGithub Pagesでホスティングしています。
-						* Reveal.jsはHTML or Markdownでスライドを作れる便利なツールです。
-						* 機会があればぜひ使ってみてください。
+						### 制作ツール・環境等
+						* スライド作成にReveal.jsを使用しました。  
+						  スライドのHTML自体はGithub Pagesでホスティングしています。
+						* Reveal.jsはHTMLやMarkdownでスライドを作れる便利なツールです。  
+						  機会があればぜひ使ってみてください。
 
 					</script>
 				</section>
